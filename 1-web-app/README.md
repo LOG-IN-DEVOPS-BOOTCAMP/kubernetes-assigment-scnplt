@@ -6,14 +6,14 @@
 - [d. ReplicaSet oluşturma ve nasıl çalıştığını inceleme](#d-replicaset-oluşturma-ve-nasıl-çalıştığını-inceleme)
     - [d.1. Deployment ve ReplicaSet farkı](#d1-deployment-ve-replicaset-farkı)
 - [e. ClusterIP tipinde Servis oluşturma ve uygulamaya erişme](#e-clusterip-tipinde-servis-oluşturma-ve-uygulamaya-erişme)
-    - [e.1. Uygulamaya erişmek için (Servis IP ile):](#e1-uygulamaya-erişmek-için-servis-ip-ile)
-    - [e.2. Uygulamaya erişmek için (Container IP ile):](#e2-uygulamaya-erişmek-için-container-ip-ile)
+    - [e.1. Uygulamaya erişmek (Servis IP ile)](#e1-uygulamaya-erişmek-servis-ip-ile)
+    - [e.2. Uygulamaya erişmek (Container IP ile)](#e2-uygulamaya-erişmek-container-ip-ile)
 
-## a. Uygulama oluşturma
+# a. Uygulama oluşturma
 
 Uygulama sadece ekrana `Hello from web-app - VERSIYON_NO!` yazıyor. Burada Deployment ve ReplicaSet farkını incelemek için `VERSION_NO`'yu değiştirerek imajı güncelleyeceğiz. 
 
-## b. Uygulamanın imajını oluşturma
+# b. Uygulamanın imajını oluşturma
 
 http://localhost:8080 üzerinden `Hello from web-app - 1!` çıktısını veren versiyonu oluşturmak için `index.js` güncellendikten sonra aşağıdaki komut ile imaj oluşturulur.
 
@@ -34,7 +34,7 @@ docker push scnplt/webapp:v1
 docker push scnplt/webapp:v2
 ```
 
-## c. Deployment oluşturma ve bununla imajı çalıştırma
+# c. Deployment oluşturma ve bununla imajı çalıştırma
 
 ```yaml
 apiVersion: apps/v1
@@ -64,7 +64,7 @@ Daha sonra oluşturduğumuz [webapp-deployment.yaml](webapp-deployment.yaml) isi
 kubectl create -f webapp-deployment.yaml
 ```
 
-## d. ReplicaSet oluşturma ve nasıl çalıştığını inceleme
+# d. ReplicaSet oluşturma ve nasıl çalıştığını inceleme
 
 ```yaml
 apiVersion: apps/v1
@@ -75,14 +75,14 @@ spec:
   replicas: 3 #--------------------> Replica sayısı
   selector:
     matchLabels:
-      app: webapp1 #---------------> Hangi template'in kullanılacağı
+      app: webapp2 #---------------> Hangi template'in kullanılacağı
   template:
     metadata:
       labels:
-        app: webapp1 #-------------> ReplicaSet ile ilişkilendirilecek template ismi
+        app: webapp2 #-------------> ReplicaSet ile ilişkilendirilecek template ismi
     spec:
       containers:
-      - name: webapp1 #------------> Container ismi
+      - name: webapp2 #------------> Container ismi
         image: scnplt/webapp:v1 #--> Kullanılacak imaj
         ports:
         - containerPort: 8080 #----> Kullanılacak port
@@ -94,7 +94,7 @@ Daha sonra oluşturduğumuz [webapp-replicaset.yaml](webapp-replicaset.yaml) isi
 kubectl create -f webapp-replicaset.yaml
 ```
 
-### d.1. Deployment ve ReplicaSet farkı
+## d.1. Deployment ve ReplicaSet farkı
 
 Deployment ile oluşturduğumuz podlar Deployment dosyasında değişiklik yaptıktan sonra (örneğin imaj versiyonu güncelleme) `apply` komutu ile kesintisiz olarak güncellenir. Fakat ReplicaSet ile oluşturduğumuz podlar ReplicaSet dosyasında değişiklik yaptıktan sonra güncellenmez. ReplicaSet'in asıl amacı çalışan pod sayısını sabit tutmaktır.
 
@@ -174,7 +174,7 @@ app.get('/', (_, res) => {
 // ...
 ```
 
-## e. ClusterIP tipinde Servis oluşturma ve uygulamaya erişme
+# e. ClusterIP tipinde Servis oluşturma ve uygulamaya erişme
 
 ```yaml
 apiVersion: v1
@@ -209,7 +209,8 @@ kubernetes       ClusterIP   10.96.0.1        <none>        443/TCP   146m
 webapp-service   ClusterIP   10.108.101.253   <none>        80/TCP    4s
 ```
 
-### e.1. Uygulamaya erişmek için (Servis IP ile):
+## e.1. Uygulamaya erişmek (Servis IP ile)
+
 ```bash
 # ReplicaSet ile oluşturulan podlardan birine erişmek için
 # Daha önce oluşturulan webapp-replicaset-dg4cp kullanılıyor.
@@ -225,7 +226,8 @@ curl http://10.108.101.253
 Hello from web-app - 1!
 ```
 
-### e.2. Uygulamaya erişmek için (Container IP ile):
+## e.2. Uygulamaya erişmek (Container IP ile)
+
 ```bash
 # Daha önce oluşturulan webapp-replicaset-dg4cp kullanılıyor.
 kubectl exec webapp-replicaset-dg4cp -ti -- bash
