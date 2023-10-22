@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: webapp-replicaset
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: webapp2
+  template:
+    metadata:
+      labels:
+        app: webapp2
+    spec:
+      containers:
+      - name: webapp2
+        image: scnplt/webapp:v1
+        ports:
+        - containerPort: 8080
